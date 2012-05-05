@@ -1,0 +1,53 @@
+@h1 Felix Object Model
+The Felix object model is based on the C++ object model.
+We do this to ensure Felix is compatible with all your
+existing C and C++ code, and so we can use your favourite
+C++ compiler to provide low level optimisations.
+@p
+However Felix has a major extension: it has a
+@link GarbageCollector|Garbage Collector.
+@p  
+But now, we shall discuss the crucial distinction between
+values and objects.
+@p
+In Felix, a <em>value</em> is immutable. It may be a literal,
+or represented by a variable. The {val} kind of variable
+cannot be addressed, and as we shall see the only way in
+Felix to modify something is either via a concrete pointer
+or an abstract handle.
+@p
+In Felix, all values are first class. That means they all
+have default initialisers, copy constructors, destructors,
+and an assignment operator. All operations in Felix use
+value semantics.
+@p
+Values are at the heart of functional programming. Although
+Felix is a traditional imperative language, it has very strong
+support for functional programming and we strongly recommend
+this style be utilised heavily.
+@p
+By contrast, an <em>object</em> is a mutable entity and 
+in general cannot be copied. Object cannot be manipulated
+directly, rather they are represented by pointers and
+operations on them are performed via these pointers.
+@p
+Pointers themselves are first class values.
+@p
+There are two main ways any value can be modified.
+The first method is to allocate the value on the heap
+with the {new} operator, which returns a pointer.
+@p
+The second method is to store the value in a {var}
+kind of variable, and then take the address of the 
+variable. Now you can assign a new value to the variable
+via the pointer.
+@p
+Because you can do this, you can also modify a component
+of a value stored in a variable, since doing so is equivalent
+to constructing a new value with a modified component and
+storing it into the variable.
+@p
+Of course objects are passed by reference, or more precisely
+they're represented by pointers which are passed by value.
+
+    

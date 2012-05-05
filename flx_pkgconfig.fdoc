@@ -1,0 +1,20 @@
+@h1 flx_pkgconfig
+{flx_pkgconfig} is a sane version of the broken
+{pkgconfig} program. It queries a database consisting
+of {*.fpc} files, each of which consists of a number
+of fields. Here's an example:
+@pre
+Name: flx
+Description: Felix core runtime support
+provides_dlib: -lflx_dynamic
+provides_slib: -lflx_static
+cflags: -Ilib/rtl
+Requires: flx_gc flx_exceptions dl
+includes:  '"flx_rtl.hpp"'  <iostream> <cstdio> <cstddef> <cassert> <climits> <string>
+@
+
+The field "Requires:" is special, it denotes a recursive
+dependency. None of the other fields have any special 
+significance to {flx_pkgconfig}, they're just columns
+of a database table row.
+    

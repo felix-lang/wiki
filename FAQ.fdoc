@@ -1,0 +1,22 @@
+@h1 Building
+@h2 Windows
+@h3 Q: How can I get a binary install for Windows?
+We do not supply binaries for any platform at this time.
+@h3 Q: What C++ Compiler does the windows build use?
+A:  MSVC++
+@h3 Q: Where is Felix installed on Windows?
+A: c:\usr\local\lib\felix\felix-<version>
+@h3 Q: Can I change the install location?
+A: No. You can manually copy the files where you like of course, but we can only support the standard location.
+@h3 Q:What else do I need to do to build for Windows?
+You need a %HOME% environment variable set to a suitable location.
+  
+@h2 Posix
+@Q: What posix like platforms will Felix build on?
+A: Hopefully all of them. We test on Linux and OSX.
+@Q: Where is Felix installed?
+A: /usr/local/lib/felix/felix-<version> 
+  
+@h2 iOS, Android
+@h3 Q: Can you build applications for iOS or Android?
+A: Felix should be able to generate code for any platform for which there is a C++ compiler, however we do not support out-of-the box cross-cross compilation at this time. We will help if you want to try it though!

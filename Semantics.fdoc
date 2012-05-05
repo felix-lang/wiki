@@ -1,0 +1,64 @@
+@h1 Evaluation Strategy
+In this article I hope to explain the Felix evaluation strategy, 
+and provide a rationale for it. It's a bit unusual!
+@p
+We'll begin by examining variable initialisations.
+When you write:
+@felix
+var x = 1;
+var y = x;
+++x;
+println$ y;
+@
+the value printed is 1. A {var} kind of variable has two key properties: it is addressable and mutable, and it is initialised when control flows through its initialiser, with the values of the variables used in the initialiser at that time. This is known as <em>eager evaluation</em> because it is done as early as possible.
+@p
+Now lets contrast this with a {fun} kind of variable:
+@felix
+var x = 1;
+fun y => x;
+++x;
+println$ y;
+@
+Here, the value printed is 2. A {fun} kind of variable is a function of no arguments, when control flows through the variable name within an expression,
+ the value is calculated from the current values of variables in the initialiser. A {fun} variable is equivalent to a function taking a unit argument and applied to that argument for every use:
+@felix
+var x = 1;
+fun y() => x;
+++x;
+println$ y();
+@
+This is known as <em>lazy evaluation</em> because it is done as late as possible. Note that {fun} variables are not addressable because every use is a function application. An actual function, of course, is addressable since 
+the function name represents a closure of the function over its environment. When such a closure is applied it refers to the values of any {var} variables at the time of evaluation.
+
+@p
+There is another way to obtain lazy evaluation for a single variable, and that is to take the variables address and pass around a pointer to it. When the pointer is dereferenced it refers to the value of the variable at the time the dereference operation occurs:
+@felix
+var x = 1;
+var px = &x;
+++x;
+println$ *px;
+@
+will of course print 2.
+There is a shorthand for this:
+
+@felix 
+var x = 1;
+ref y <- x;
+++x;
+println$ y;
+@
+
+Here {y} is actually a pointer to {x} which is automatically
+dereferenced on every use.
+@p
+Finally:
+@felix
+var x = 1;
+val y = x;
+++x;
+println$ y;
+@
+This may print either 1 or 2. The {val} is an immutable non-addressable variable which can be evaluated either eagerly or lazily, and may take on any of the values it has had between its initialisation and the value of its initialiser at the time of use, at the discretion of the compiler.
+A {val} always has determinisatic results if it depends only on literals, other {vals}, or applications of pure functions. We generally speak of it as a value.
+@p
+The indeterminacy is there to allow the compiler to choose the fastest evaluation strategy. Surprisingly lazy evaluation is usually faster than eager evaluation, unless there are a large number of references. Use of indeterminate evaluation strategy is one of the key reasons Felix can obtain hyperlight performance.
