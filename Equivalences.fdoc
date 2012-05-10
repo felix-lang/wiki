@@ -1,0 +1,22 @@
+@h1 Equivalences
+It is useful to learn some shortcuts and things that 
+are equivalent.
+@h2 Expressions.
+@pre
+  x             #{ x }         { x }()         #{ return x; }
+  *&x           x
+  x.f           f x
+  x.1           1 x
+@
+@h2 Definitions.
+@pre
+  fun f(x:int)=>x;            fun f(x:int)={ return x; }
+@
+@pre
+  fun f(x:int * long)=>x.0;   
+  fun (x:int, y:long) => x;
+  fun (x:int * long) => match x with | ?x,_ => x;
+  fun f: int * long -> int = | ?x,_=> x;
+@
+
+  

@@ -1,4 +1,4 @@
-Welcome to Felix!
+<h4>Welcome to Felix!</h4>
   
 Here's the usual
 @link /wiki/wiki/FAQ.fdoc | FAQ.
@@ -13,4 +13,9 @@ Here's a description of the Felix
 Description of 
 @link /wiki/wiki/Tools.fdoc | Tools.
   
+Learning Felix: some
+@link /wiki/wiki/Equivalences.fdoc | Equivalences.
+  
+  
+@link /wiki/wiki/Building_on_Windows.fdoc | Building on Windows | font-weight:bolder;
   

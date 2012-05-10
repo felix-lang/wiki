@@ -9,14 +9,20 @@ The compiler
 The package manager
 @link flx_pkgconfig.fdoc | flx_pkgconfig
 
-The file copy utility
-@link flx_ls.fdoc flx_ls
+The file list utility
+@link flx_ls.fdoc | flx_ls
   
-The personal webserver
+The File copy utility
+@link flx_cp.fdoc | flx_cp  
+  
+The personal
 @link webserver.fdoc | webserver
 
 The enterprise webserver
-[ref]
+[ref].
 
-The Wiki of course [ref]
+The Wiki of course [ref].
+  
+The Felix build system
+@link fbuild.fdoc | fbuild.
   

@@ -1,7 +1,8 @@
 @h1 Evaluation Strategy
 In this article I hope to explain the Felix evaluation strategy, 
 and provide a rationale for it. It's a bit unusual!
-@p
+@h2 Initialisation semantics.
+@h3 <code>var</code>: Eager evaluation.
 We'll begin by examining variable initialisations.
 When you write:
 @felix
@@ -11,7 +12,8 @@ var y = x;
 println$ y;
 @
 the value printed is 1. A {var} kind of variable has two key properties: it is addressable and mutable, and it is initialised when control flows through its initialiser, with the values of the variables used in the initialiser at that time. This is known as <em>eager evaluation</em> because it is done as early as possible.
-@p
+
+@h3 <code>fun</code>: Lazy evaluation.
 Now lets contrast this with a {fun} kind of variable:
 @felix
 var x = 1;
@@ -20,7 +22,7 @@ fun y => x;
 println$ y;
 @
 Here, the value printed is 2. A {fun} kind of variable is a function of no arguments, when control flows through the variable name within an expression,
- the value is calculated from the current values of variables in the initialiser. A {fun} variable is equivalent to a function taking a unit argument and applied to that argument for every use:
+the value is calculated from the current values of variables in the initialiser. A {fun} variable is equivalent to a function taking a unit argument and applied to that argument for every use:
 @felix
 var x = 1;
 fun y() => x;
@@ -30,27 +32,7 @@ println$ y();
 This is known as <em>lazy evaluation</em> because it is done as late as possible. Note that {fun} variables are not addressable because every use is a function application. An actual function, of course, is addressable since 
 the function name represents a closure of the function over its environment. When such a closure is applied it refers to the values of any {var} variables at the time of evaluation.
 
-@p
-There is another way to obtain lazy evaluation for a single variable, and that is to take the variables address and pass around a pointer to it. When the pointer is dereferenced it refers to the value of the variable at the time the dereference operation occurs:
-@felix
-var x = 1;
-var px = &x;
-++x;
-println$ *px;
-@
-will of course print 2.
-There is a shorthand for this:
-
-@felix 
-var x = 1;
-ref y <- x;
-++x;
-println$ y;
-@
-
-Here {y} is actually a pointer to {x} which is automatically
-dereferenced on every use.
-@p
+@h3 <code>val</code>: Indeterminate Evaluation.
 Finally:
 @felix
 var x = 1;
@@ -62,3 +44,65 @@ This may print either 1 or 2. The {val} is an immutable non-addressable variable
 A {val} always has determinisatic results if it depends only on literals, other {vals}, or applications of pure functions. We generally speak of it as a value.
 @p
 The indeterminacy is there to allow the compiler to choose the fastest evaluation strategy. Surprisingly lazy evaluation is usually faster than eager evaluation, unless there are a large number of references. Use of indeterminate evaluation strategy is one of the key reasons Felix can obtain hyperlight performance.
+  
+@h2 Indirection.
+There is another way to obtain lazy evaluation for a single variable, and that is to take the variables address and pass around a pointer to it. When the pointer is dereferenced it refers to the value of the variable at the time the dereference operation occurs:
+@felix
+var x = 1;
+var px = &x;
+++x;
+println$ *px;
+@
+will of course print 2.
+There is a shorthand for this:
+
+@felix
+var x = 1;
+ref y <- x;
+++x;
+println$ y;
+@
+
+Here {y} is actually a pointer to {x} which is automatically
+dereferenced on every use.
+@bug
+The notation for a local ref differs from the requirements for
+a ref parameter: that requires an explicit pointer.
+The local version would be ref y = &x but that doesn't work.
+@
+@h2 Assignment.
+Although you can write
+@felix
+var x = 1;
+x = 2;
+@
+Felix does not support assignment. The code above is just a syntactic sugar
+for this:
+@felix
+var x = 1;
+&x <- 2;
+@
+This means to store the value on the RHS of the {<-} operator
+at the address given on the LHS. The type of the LHS must be a pointer
+to the type of the RHS.
+@p
+Felix does not allow taking the address of anything except a variable
+or a C primitive function marked {lvalue}. However you can 
+appear to take the address of an aggregate component:
+@felix
+var x = 1,2;
+&(x.1) <- 3;
+@
+However this again is just sugar, it actually means
+@felix
+(&x).1 <- 3;
+@
+and now the projection function 1 is applied to a pointer
+instead of a value, which makes it an address projection,
+which adds a value to the address. In turn this means:
+@felix
+x.1 = 3;
+@
+is well defined. In general all mutators operate on pointers.
+
+  

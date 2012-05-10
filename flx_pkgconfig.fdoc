@@ -1,6 +1,13 @@
 @h1 flx_pkgconfig
 {flx_pkgconfig} is a sane version of the broken
-{pkgconfig} program. It queries a database consisting
+{pkgconfig} program. It is an entirely general purpose
+program, with no specific knowledge of C or other
+programming language. It produces results based on basic
+mathematical set theory, not some hack related to 
+specific tools.
+  
+@h2 The database.
+{flx_pkgconfg} queries a database consisting
 of {*.fpc} files, each of which consists of a number
 of fields. Here's an example:
 @pre
@@ -12,9 +19,188 @@ cflags: -Ilib/rtl
 Requires: flx_gc flx_exceptions dl
 includes:  '"flx_rtl.hpp"'  <iostream> <cstdio> <cstddef> <cassert> <climits> <string>
 @
+@h2 Fields.
+Each line of a package file may contain a field name
+followed by a {:} character then some values.
+Spaces before or after the field name are ignored,
+and the name cannot include a {:} character, otherwise
+the name can be any string, although it is wise
+to stick to what would be a valid C identifier.
 
+@h2 Field values.
+After the {:} you can put a list of space
+separated field values. Zero, one, or more values
+are fine. If you need to include spaces in a field
+value you can surround it with single or double
+quotes.
+@p
+If you can't fit all the values on a line,
+just add another line with the same field name.
+@p  
 The field "Requires:" is special, it denotes a recursive
 dependency. None of the other fields have any special 
 significance to {flx_pkgconfig}, they're just columns
 of a database table row.
+
+@h2 Specifying the database.
+The files comprising the database can be specified with the
+command line switch {--path} as shown:
+@pre
+flx_pkgconfig --path=myconfig --path+=anotherdir
+@
+Here {--path=} sets the initial directory path and {--path+=}
+adds an extra directory on the end.
+@p
+You can also use an environment variable:
+@pre
+PKG_CONFIG_PATH=dir1:dir2:dir3
+@
+@bug
+This wont work right on Windows: to be fixed.
+@
+The path is searched left to right. The path established
+by the environment is overridden by the {--path=} switch
+and augmented by the {--path+=} switch.
+      
+@h2 Testing package existence.
+To check is some packages exist in the specified path:
+@pre
+flx --path=build/release/config --list flx gc dog
+@
+This will print out a single line containing the subset of
+the package names listed that actually exist. It will return
+an error code of 0 if they all exist, and 1 otherwise.
+
+@h2 Finding missing packages.
+Instead of {--list} you can use {--missing}
+to find missing packages. The return code is the same
+as for {--list}: 0 if there are no missing packages.
+@pre
+flx_pkgconfig --path=build/release/config --rec --missing flx dog
+@
+
+@h2 Turning off error return.
+Normally if something is missing, {flx_pkgconfig}
+will return 1 instead of 0. To disable this features,
+use the {--noerror} switch.
     
+@h2 Grabbing arguments from a file.
+You can grab arguments from a file by specifying
+the filename preceeded by a {@} character.
+Each line of the file, with whitspace stripped off
+the start and end, is counted as one argument,
+except that blank lines don't count.
+@pre
+flx_pkgconfig @mypath --list @mypackages
+@
+It's a fatal error if the files don't exist,
+{flx_pkgconfig} will return with 1.
+
+@h2 Checking dependencies.
+Based on the {Requires:} field you can find the transitive 
+closure of a given set of packages:
+@pre
+flx_pkgconfig --path=build/release/config --list --rec flx
+@
+The {--rec} switch says to process packages recursively.
+When {flx_pkgconfig} processes a package, if there's a
+{Requires:} field it then tries to find the required
+packages and process them. Circular references are
+handled by ignoring uplinks in the graph. There's a shorthand,
+{-r} which can also be used.
+    
+@h2 Printing out field values.
+Given a set of packages, you can print out the value of a
+particular field, instead of the package name:
+@pre
+flx_pkgconfig --path=build/release/config --field=includes --rec flx
+@
+It's not an error if the field is missing from a package.
+Not all packages have include files associated with them!
+The fields are printed whilst {flx_pkgconfig} is scanning 
+the data file. If it sees the field before a {Requires:}
+field it prints it first, then does the dependency.
+If it see it after the dependency, the field will be
+printed after the includes for the dependency.
+So the field order matters!
+ 
+@h2 Removing duplicate field values.
+Sometimes you want a result with only one
+occurence of a field value. You can use the
+switches {--keepleftmost} or {--keeprightmost}
+to remove all but the left or rightmost occurences
+or a field value in the output.
+
+@h2 Reversed results.
+You can reverse the results obtained with the {--backwards}
+switch. This reverse the order of the obtained field values
+  <em>before</em> the {--keepleftmost} or {--keeprightmost}
+switches are applied.
+@p
+Reversing results is useful when linking, depending on
+linker semantics. Sane linkers list library modules first,
+then object modules, and expect the unresolved references
+to be resolved against the set of symbols in the libraries.
+@p
+however Unix {ld} command is retarded, and expects the
+modules to be presented first, then the libraries containing
+the required symbols. You can use the {--backwards},
+{--keepleftmost} and {--keeprightmost} switches
+to get a module and library link order for your linker
+provided the package configuration files consistently
+put the required switches in fields before or after
+the {Requires:} field.
+
+@h2 Recursing on a different field.
+Normally, {flx_pkgconfig} recurses if you specify
+{--rec}, and does so on the {Requires:} field,
+however you can specify recursion on any field
+with {--rec=fieldname}. So actually the {Requires:}
+field is only special because it is the default
+of the {--rec} switch.
+@p
+This feature allows recursive descent of any graph
+of packages.
+@h2 Shadowing.
+Normally, {flx_pkgconfig} will find all files with
+a given name on the specified search path.
+This allows you to add extra information to a package
+description without modifying the original package
+descriptor file.
+@p
+However, sometimes you want to completely replace
+a package description, for example Felix may guess
+where a package is installed, but it may be wrong,
+or simply not the one you want. To handle this you use
+the {--hide} switch. This causes the filesystem to be
+viewed through the path the same way symbols in nested
+scopes are handled in C: the innermost, or first
+occurrence shadows or hides the any others.
+
+@h1 Felix standard fields.
+Felix uses conventions regarding what is stored
+in the data base. The current standard location
+for the database is {/usr/local/lib/felix/felix-<version>/config}
+after installation. We may change this, to allow user configuration
+data to persist across installations.
+@p
+The specifications in a data base are local to a particular
+compilation environment. They're specifically intended to map
+abstract package requirements from Felix programs to
+concrete data required for building. Therefore the
+filenames and switches used in the data base are necessarily
+platform dependent and non-portable.
+@p
+Felix uses these fields:
+<ul>
+  <li>Name: documentation only</li>
+  <li>Description: a quick description</li>
+  <li>provides_slib: static link library provided by package</li>
+  <li>provides_dlib: dynamic link library provided by package</li>
+  <li>requires_slib: static link library required by package, other than one determined by a dependency</li>
+  <li>requires_dlib: dynamic link library required by package, other than one determined by a dependency</li>
+  <li>requires_driver: specifies the Felix mainline driver required to run a program, usually either {flx_run} for general use or {flx_arun} if asynchronous I/O is required for networking</li>
+   <li>cflags: specifies any flags needed for compilation. Typically these will be {-I} switches for include file paths or {-L} switches for linker search paths, or just specific compilation options.</li> 
+   <li>includes: a list of headers to be {#include}d to compile a program using the package</li>
+</ul>
+  

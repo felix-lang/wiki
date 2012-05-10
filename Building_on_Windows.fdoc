@@ -1,0 +1,35 @@
+<h4>Recipe for building Felix on Windows</h4>
+<p>Get Git, git is the prefered method for getting Felix. There are multiple git clients for windows. 
+If you have cygwin you can use the cygwin git package if you don't I have used the Msys Git port, you can get it at 
+<pre>http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git</pre>
+Some suggestions when installing choose: Use Git Bash only, Checkout as is commit unix style line endings
+</p>
+<p>
+Now getting the code. It seems the windows git is having problems using ssh for some reson, I will update this when I can get it working.
+In the mean time however you can use the git https url: which is https://github.com/felix-lang/felix.git 
+<br/>Open the git bash shell and enter the command:
+<pre>
+env GIT_SSL_NO_VERIFY=true git clone https://github.com/felix-lang/felix.git 
+</pre>
+<p>
+Okay we got the code now what?
+Felix is a complex system and as you would expect has some dependencies:
+<ul>
+  <li>Python 3.x, Windows version (NOT Cygwin or MingW).</li>
+  <li>Microsoft Visual C++ (command line compilers)</li>
+  <li>Ocaml 3.11 or better</li>
+  <li>...</li>
+</ul>
+</p>
+<p>Setup: to run Felix you need to use a console which has the 
+environment for Visual C++ set up correctly. 
+</p>
+<p>At this time you also must have an environment variable
+<code>HOME</code> set to point to some folder where Felix
+can store your personal preferences.
+</p>
+<p>Felix will install in C:\usr\local\lib\felix so you should
+make sure you have permission for the install process to create it,
+otherwise make sure it is created already.
+</p>
+ 
